@@ -131,6 +131,8 @@ download_nvidia_installer() {
 run_nvidia_installer() {
   echo "Running Nvidia installer..."
   pushd "${NVIDIA_INSTALL_DIR_CONTAINER}"
+  # Installer tries to insmod kernel modules, but fails on dynamic dependency
+  modprobe -C "${ROOT_MOUNT_DIR}/etc/modprobe.d" -d "${ROOT_MOUNT_DIR}" ipmi_msghandler
   sh "${NVIDIA_INSTALLER_RUNFILE}" \
     --utility-prefix="${NVIDIA_INSTALL_DIR_CONTAINER}" \
     --opengl-prefix="${NVIDIA_INSTALL_DIR_CONTAINER}" \
@@ -147,6 +149,7 @@ run_nvidia_installer() {
 configure_cached_installation() {
   echo "Configuring cached driver installation..."
   update_container_ld_cache
+  modprobe -C "${ROOT_MOUNT_DIR}/etc/modprobe.d" -d "${ROOT_MOUNT_DIR}" ipmi_msghandler
   if ! lsmod | grep -w 'nvidia' > /dev/null; then
     insmod "${NVIDIA_INSTALL_DIR_CONTAINER}/drivers/nvidia.ko"
   fi
