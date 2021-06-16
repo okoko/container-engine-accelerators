@@ -15,9 +15,9 @@
 FROM centos:7
 
 RUN yum update -y && \
-    yum install -y gcc make && \
-		yum clean all && \
-		rm -rf /var/cache/yum
+    yum install -y gcc make perl && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 #RUN apt-get update && \
 #    apt-get install -y kmod gcc make curl && \

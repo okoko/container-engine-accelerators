@@ -17,9 +17,9 @@ ARG base_image=registry.access.redhat.com/ubi7:7.9-405
 FROM ${base_image}
 
 RUN yum update -y && \
-    yum install -y gcc make && \
-		yum clean all && \
-		rm -rf /var/cache/yum
+    yum install -y gcc make perl && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 COPY entrypoint.sh /entrypoint.sh
 
