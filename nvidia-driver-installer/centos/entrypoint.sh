@@ -93,20 +93,12 @@ configure_nvidia_installation_dirs() {
   mkdir -p /usr/lib/x86_64-linux-gnu
   mount -t overlay -o lowerdir=/usr/lib/x86_64-linux-gnu,upperdir=lib64,workdir=lib64-workdir none /usr/lib/x86_64-linux-gnu
 
-  # nvidia-installer does not provide an option to configure the
-  # installation path of driver kernel modules such as nvidia.ko. The following
-  # workaround ensures that the modules are accessible from outside the
-  # installer container filesystem.
-  mkdir -p drivers drivers-workdir
-  mkdir -p /lib/modules/${KERNEL_VERSION}/video
-  mount -t overlay -o lowerdir=/lib/modules/${KERNEL_VERSION}/video,upperdir=drivers,workdir=drivers-workdir none /lib/modules/${KERNEL_VERSION}/video
-
   # Populate ld.so.conf to avoid warning messages in nvidia-installer logs.
   update_container_ld_cache
 
   # Install an exit handler to cleanup the overlayfs mount points.
-	# /usr/bin is unmounted in a lazy way since /bin is a symlink to /usr/bin in centos
-	# this causes /usr/bin/bash to be always in use and be ununmountable.
+  # /usr/bin is unmounted in a lazy way since /bin is a symlink to /usr/bin in centos
+  # this causes /usr/bin/bash to be always in use and be ununmountable.
   trap "{ umount /lib/modules/${KERNEL_VERSION}/video; umount /usr/lib/x86_64-linux-gnu ; umount -l /usr/bin; }" EXIT
   popd
   echo "Configuring installation directories... DONE."
@@ -128,7 +120,10 @@ run_nvidia_installer() {
     --opengl-prefix="${NVIDIA_INSTALL_DIR_CONTAINER}" \
     --no-install-compat32-libs \
     --log-file-name="${NVIDIA_INSTALL_DIR_CONTAINER}/nvidia-installer.log" \
-		--kernel-source-path=/usr/src/kernels/${KERNEL_VERSION} \
+    --kernel-source-path=/usr/src/kernels/${KERNEL_VERSION} \
+    --kernel-install-path="${NVIDIA_INSTALL_DIR_CONTAINER}/drivers" \
+    --skip-depmod \
+    --no-kernel-module-source \
     --no-drm \
     --silent \
     --accept-license
